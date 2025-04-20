@@ -42,7 +42,7 @@ nav ul li a:hover {
 .main-content {
   text-align: left;
   padding: 50px;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0;
 }
 
@@ -93,17 +93,17 @@ nav ul li a:hover {
 }
 
 .contact-links {
-  margin-top: 50px; /* Top margin should now work */
-  display: flex; /* Use flexbox for alignment */
-  justify-content: center; /* Centers items horizontally */
-  align-items: center; /* Centers items vertically (if needed) */
-  text-align: center; /* Ensures text is centered inside links */
+  margin-top: 50px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  text-align: center; 
 }
 
 .contact-links a {
   font-family: "Kanit", sans-serif;
   font-size: 18px;
-  margin: 10px; /* Adds space between each link */
+  margin: 10px; 
 }
 
 
