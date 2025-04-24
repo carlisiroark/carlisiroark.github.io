@@ -1,0 +1,109 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #121212;
+    color: #dcd7c2;
+    font-family: "Kanit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  h1, h2, h3, h4, h5 {
+    font-family: "Kanit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #dcd7c2;
+  }
+  
+  a {
+    color: #66aaff;
+    text-decoration: none;
+    font-family: "Kanit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+    color: #ffffff;
+    font-family: "Kanit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  img.logo {
+    height: 40px;
+    width: auto;
+  }
+  
+  .list-group-item {
+    font-weight: 300;
+    background-color: #121212;
+    color: #dcd7c2;
+  }
+  
+  footer {
+    color: #999;
+  }
+  
+
+  
+  
+  nav a:hover {
+    color: #ffffff !important;
+  }
+  
+  
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .hero {
+    position: relative;
+    background-image: url('https://static7.depositphotos.com/1035951/769/i/450/depositphotos_7696647-stock-photo-canada-and-british-commonwealth-and.jpg');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+  scroll-behavior: smooth;
+}
+
+  .hero::before {
+   content: "";
+   position: absolute;
+   top: 0;
+   left: 0;
+   height: 100%;
+   width: 100%;
+   background-color: rgba(0, 0, 0, 0.55);
+   z-index: 1;
+}
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 2rem;
+    max-width: 800px;
+}
+
+  .contact-icons a {
+    color: #66aaff;
+    font-size: 1.75rem;
+    margin: 0 12px;
+    transition: color 0.2s, transform 0.2s;
+}
+
+  .contact-icons a:hover {
+    color: white;
+    transform: translateY(-2px);
+}
+  
