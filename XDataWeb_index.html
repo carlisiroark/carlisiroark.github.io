@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investigation Web Mapper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            position: relative;
+            height: 100vh;
+        }
+
+        .main-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(45deg, #0d1117 0%, #161b22 100%);
+        }
+
+        canvas {
+            cursor: crosshair;
+            display: block;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: #21262d;
+            border-left: 1px solid #30363d;
+            padding: 20px;
+            overflow-y: auto;
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            z-index: 10;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.visible {
+            transform: translateX(0);
+        }
+
+        .sidebar h2 {
+            color: #58a6ff;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .node-info {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .node-info h3 {
+            color: #ffa657;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .node-info textarea {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #f0f6fc;
+            padding: 10px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .node-info textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(33, 38, 45, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            backdrop-filter: blur(10px);
+        }
+
+        .controls h3 {
+            color: #58a6ff;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .controls p {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .toggle-sidebar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #f0f6fc;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            z-index: 30;
+        }
+
+        .toggle-sidebar:hover {
+            background: #30363d;
+        }
+
+        .node-info input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+            -webkit-appearance: none;
+            height: 5px;
+            border-radius: 3px;
+            background: #30363d;
+            outline: none;
+        }
+
+        .node-info input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #58a6ff;
+            cursor: pointer;
+        }
+
+        .node-info input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #58a6ff;
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-label {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .delete-btn {
+            background: #da3633;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        .stats {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(33, 38, 45, 0.9);
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-canvas">
+            <canvas id="canvas"></canvas>
+            
+            <div class="controls">
+                <h3>Controls</h3>
+                <p>• Click empty space: Create node</p>
+                <p>• Hold Ctrl + drag from node to node: Create connection</p>
+                <p>• Click node: Select and edit in panel</p>
+                <p>• Drag node: Move position</p>
+                <p>• Right-click node: Delete</p>
+            </div>
+
+            
+            <div class="stats">
+                <span id="nodeCount">Nodes: 0</span> | 
+                <span id="connectionCount">Connections: 0</span>
+            </div>
+        </div>
+        
+        <div class="sidebar" id="sidebar">
+            <h2>Entity Details</h2>
+            <div id="nodeDetails">
+                <p style="color: #8b949e; font-style: italic;">
+                    Click on a node to view and edit its details.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const sidebar = document.getElementById('sidebar');
+        const nodeDetails = document.getElementById('nodeDetails');
+
+        // Canvas setup
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const pixelRatio = window.devicePixelRatio || 1;
+            
+            // Set the canvas size accounting for device pixel ratio
+            canvas.width = container.clientWidth * pixelRatio;
+            canvas.height = container.clientHeight * pixelRatio;
+            
+            // Scale the canvas back down using CSS
+            canvas.style.width = container.clientWidth + 'px';
+            canvas.style.height = container.clientHeight + 'px';
+            
+            // Scale the drawing context so everything draws at the higher resolution
+            ctx.scale(pixelRatio, pixelRatio);
+            
+            draw();
+        }
+        
+        // Wait for DOM to be ready
+        window.addEventListener('load', () => {
+            resizeCanvas();
+        });
+        window.addEventListener('resize', resizeCanvas);
+
+        // Data structures
+        let nodes = [];
+        let connections = [];
+        let selectedNode = null;
+        let draggedNode = null;
+        let connecting = false;
+        let connectStart = null;
+        let mousePos = { x: 0, y: 0 };
+        let nodeIdCounter = 0;
+
+        class Node {
+            constructor(x, y, label = 'New Entity') {
+                this.id = nodeIdCounter++;
+                this.x = x;
+                this.y = y;
+                this.label = label;
+                this.description = '';
+                this.radius = 25;
+                this.color = '#58a6ff';
+                this.selected = false;
+            }
+
+            draw() {
+                // Draw node circle
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.selected ? '#ffa657' : this.color;
+                ctx.fill();
+                ctx.strokeStyle = this.selected ? '#ff7b72' : '#30363d';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw node label
+                ctx.fillStyle = '#0d1117';
+                ctx.font = 'bold 12px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const maxWidth = this.radius * 1.6;
+                const text = this.label.length > 12 ? this.label.substring(0, 12) + '...' : this.label;
+                ctx.fillText(text, this.x, this.y);
+            }
+
+            contains(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                return dx * dx + dy * dy <= this.radius * this.radius;
+            }
+        }
+
+        // Connection class
+        class Connection {
+            constructor(nodeA, nodeB) {
+                this.nodeA = nodeA;
+                this.nodeB = nodeB;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.nodeA.x, this.nodeA.y);
+                ctx.lineTo(this.nodeB.x, this.nodeB.y);
+                ctx.strokeStyle = '#8b949e';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw arrowhead
+                const angle = Math.atan2(this.nodeB.y - this.nodeA.y, this.nodeB.x - this.nodeA.x);
+                const headLength = 15;
+                const endX = this.nodeB.x - Math.cos(angle) * this.nodeB.radius;
+                const endY = this.nodeB.y - Math.sin(angle) * this.nodeB.radius;
+
+                ctx.beginPath();
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(endX - headLength * Math.cos(angle - Math.PI / 6), endY - headLength * Math.sin(angle - Math.PI / 6));
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(endX - headLength * Math.cos(angle + Math.PI / 6), endY - headLength * Math.sin(angle + Math.PI / 6));
+                ctx.strokeStyle = '#f0f6fc';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        // Drawing functions
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connections first (behind nodes)
+            connections.forEach(conn => conn.draw());
+
+            // Draw temporary connection line when connecting
+            if (connecting && connectStart) {
+                ctx.beginPath();
+                ctx.moveTo(connectStart.x, connectStart.y);
+                ctx.lineTo(mousePos.x, mousePos.y);
+                ctx.strokeStyle = '#ffa657';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Draw nodes
+            nodes.forEach(node => node.draw());
+        }
+
+        // Event handlers
+        canvas.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Check if clicking on a node
+            const clickedNode = nodes.find(node => node.contains(x, y));
+
+            if (e.button === 0) { // Left click
+                if (clickedNode) {
+                    if (e.ctrlKey) {
+                        // Start connection mode
+                        connecting = true;
+                        connectStart = clickedNode;
+                    } else {
+                        // Select and prepare for drag
+                        selectNode(clickedNode);
+                        draggedNode = clickedNode;
+                    }
+                } else {
+                    // Create new node
+                    const newNode = new Node(x, y);
+                    nodes.push(newNode);
+                    selectNode(newNode);
+                    updateStats();
+                    draw();
+                }
+            } else if (e.button === 2 && clickedNode) { // Right click
+                deleteNode(clickedNode);
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mousePos.x = e.clientX - rect.left;
+            mousePos.y = e.clientY - rect.top;
+
+            // Only drag nodes if not in connection mode
+            if (draggedNode && !connecting) {
+                draggedNode.x = mousePos.x;
+                draggedNode.y = mousePos.y;
+                draw();
+            } else if (connecting) {
+                draw(); // Redraw to show connection line
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (connecting && connectStart) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const targetNode = nodes.find(node => node.contains(x, y));
+
+                if (targetNode && targetNode !== connectStart) {
+                    // Create connection if not already exists
+                    const existingConnection = connections.find(conn => 
+                        (conn.nodeA === connectStart && conn.nodeB === targetNode) ||
+                        (conn.nodeA === targetNode && conn.nodeB === connectStart)
+                    );
+                    if (!existingConnection) {
+                        connections.push(new Connection(connectStart, targetNode));
+                        updateStats();
+                    }
+                }
+            }
+
+            // Reset all interaction states
+            connecting = false;
+            connectStart = null;
+            draggedNode = null;
+            draw();
+        });
+
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Node management
+        function selectNode(node) {
+            nodes.forEach(n => n.selected = false);
+            node.selected = true;
+            selectedNode = node;
+            
+            // Show sidebar when a node is selected
+            const sidebar = document.getElementById('sidebar');
+            console.log('Selecting node, sidebar element:', sidebar);
+            sidebar.classList.add('visible');
+            console.log('Added visible class, classes:', sidebar.className);
+            
+            updateNodeDetails();
+        }
+
+        function deleteNode(node) {
+            // Remove connections involving this node
+            connections = connections.filter(conn => 
+                conn.nodeA !== node && conn.nodeB !== node
+            );
+            
+            // Remove node
+            nodes = nodes.filter(n => n !== node);
+            
+            if (selectedNode === node) {
+                selectedNode = null;
+                // Hide sidebar when no node is selected
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('visible');
+                nodeDetails.innerHTML = '<p style="color: #8b949e; font-style: italic;">Click on a node to view and edit its details.</p>';
+            }
+            
+            updateStats();
+            draw();
+        }
+
+        function updateNodeDetails() {
+            if (!selectedNode) return;
+
+            nodeDetails.innerHTML = `
+                <div class="node-info">
+                    <h3>Entity: ${selectedNode.label}</h3>
+                    <input type="text" value="${selectedNode.label}" oninput="updateNodeLabel(this.value)" 
+                           style="width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: #f0f6fc; padding: 8px; margin-bottom: 10px;">
+                    
+                    <div class="slider-label">Node Size: <span id="sizeValue">${selectedNode.radius}</span></div>
+                    <input type="range" min="15" max="50" value="${selectedNode.radius}" 
+                           onchange="updateNodeSize(this.value)" oninput="document.getElementById('sizeValue').textContent = this.value">
+                    
+                    <textarea placeholder="Add description, notes, or details about this entity..." 
+                              oninput="updateNodeDescription(this.value)">${selectedNode.description}</textarea>
+                    <button class="delete-btn" onclick="deleteSelectedNode()">Delete Entity</button>
+                </div>
+            `;
+        }
+
+        function updateNodeSize(newSize) {
+            if (selectedNode) {
+                selectedNode.radius = parseInt(newSize);
+                draw();
+            }
+        }
+
+        function updateNodeLabel(newLabel) {
+            if (selectedNode) {
+                selectedNode.label = newLabel || 'New Entity';
+                draw();
+            }
+        }
+
+        function updateNodeDescription(newDescription) {
+            if (selectedNode) {
+                selectedNode.description = newDescription;
+            }
+        }
+
+        function deleteSelectedNode() {
+            if (selectedNode) {
+                deleteNode(selectedNode);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('nodeCount').textContent = `Nodes: ${nodes.length}`;
+            document.getElementById('connectionCount').textContent = `Connections: ${connections.length}`;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.toggle-sidebar');
+            
+            const isCurrentlyHidden = sidebar.classList.contains('hidden');
+            console.log('Before toggle - hidden class:', isCurrentlyHidden);
+            console.log('Current sidebar computed width:', window.getComputedStyle(sidebar).width);
+            
+            if (isCurrentlyHidden) {
+                // Show the panel
+                sidebar.classList.remove('hidden');
+                toggleBtn.textContent = 'Hide Panel';
+                console.log('Removed hidden class');
+                // Check if it's actually visible now
+                setTimeout(() => {
+                    console.log('After show - computed width:', window.getComputedStyle(sidebar).width);
+                    console.log('After show - has hidden class:', sidebar.classList.contains('hidden'));
+                }, 50);
+            } else {
+                // Hide the panel
+                sidebar.classList.add('hidden');
+                toggleBtn.textContent = 'Show Panel';
+                console.log('Added hidden class');
+            }
+            
+            // Resize canvas after transition
+            setTimeout(() => {
+                resizeCanvas();
+                console.log('Final canvas resize - sidebar offsetWidth:', sidebar.offsetWidth);
+            }, 350);
+        }
+
+        // Initialize - moved to end and wrapped in load event
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            draw();
+            updateStats();
+        });
+    </script>
+</body>
+</html>
