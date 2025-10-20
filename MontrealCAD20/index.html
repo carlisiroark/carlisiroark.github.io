@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Montreal $20 Bill - AR</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        model-viewer {
+            width: 100%;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.5rem;
+        }
+        
+        .ar-button-custom {
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 50px;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        
+        .ar-button-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ar-button-custom:active {
+            transform: translateY(0);
+        }
+        
+        .icon {
+            font-size: 1.5rem;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .instructions strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        
+        /* Hide default AR button */
+        model-viewer::part(default-ar-button) {
+            display: none;
+        }
+        
+        /* Loading animation */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        /* Interaction prompt styling */
+        model-viewer::part(interaction-prompt) {
+            display: none;
+        }
+        
+        .hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            model-viewer {
+                height: 350px;
+            }
+            
+            .ar-button-custom {
+                padding: 16px 32px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💵 Montreal $20 Bill</h1>
+        <p class="subtitle">Canadian Currency in 3D</p>
+        
+        <model-viewer
+            id="bill-viewer"
+            src="https://vlyzifpqemfanxllnmuf.supabase.co/storage/v1/object/public/files/Stephen/3d/10-15-2025_1760560918072.glb"
+            ios-src="https://vlyzifpqemfanxllnmuf.supabase.co/storage/v1/object/public/files/Stephen/other/10-15-2025-1760560918072_1760561266463.usdz"
+            alt="Canadian $20 bill from Montreal"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            touch-action="pan-y"
+            auto-rotate
+            auto-rotate-delay="2000"
+            rotation-per-second="30deg"
+            shadow-intensity="1"
+            exposure="1.2"
+            camera-orbit="0deg 75deg 105%"
+            min-camera-orbit="auto auto 50%"
+            max-camera-orbit="auto auto 200%"
+            field-of-view="30deg"
+            environment-image="neutral"
+            tone-mapping="commerce"
+            disable-zoom>
+            
+            <div class="hint" slot="poster">
+                👆 Drag to rotate
+            </div>
+        </model-viewer>
+        
+        <button class="ar-button-custom" id="ar-trigger">
+            <span class="icon">📱</span>
+            <span>View in AR</span>
+        </button>
+        
+        <div class="badge">✨ AR Ready</div>
+        
+        <div class="instructions">
+            <strong>How to Use:</strong>
+            👆 Drag on the model above to rotate it<br>
+            📱 Tap "View in AR" to see it in your space<br>
+            🔍 Walk around the bill in augmented reality<br>
+            📏 See both sides at actual size or larger
+        </div>
+    </div>
+    
+    <script>
+        // Get the model viewer and custom AR button
+        const modelViewer = document.getElementById('bill-viewer');
+        const arButton = document.getElementById('ar-trigger');
+        
+        // Trigger AR when custom button is clicked
+        arButton.addEventListener('click', () => {
+            modelViewer.activateAR();
+        });
+        
+        // Show/hide AR button based on AR availability
+        modelViewer.addEventListener('ar-status', (event) => {
+            if (event.detail.status === 'not-presenting') {
+                arButton.style.display = 'inline-flex';
+            }
+        });
+        
+        // Hide hint after first interaction
+        let hasInteracted = false;
+        const hint = document.querySelector('.hint');
+        
+        modelViewer.addEventListener('camera-change', () => {
+            if (!hasInteracted && hint) {
+                hasInteracted = true;
+                hint.style.animation = 'none';
+                hint.style.opacity = '0';
+                setTimeout(() => {
+                    hint.style.display = 'none';
+                }, 300);
+            }
+        });
+        
+        // Add loading state
+        modelViewer.addEventListener('load', () => {
+            console.log('Model loaded successfully');
+        });
+        
+        modelViewer.addEventListener('error', (event) => {
+            console.error('Error loading model:', event);
+        });
+    </script>
+</body>
+</html>
