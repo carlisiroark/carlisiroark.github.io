@@ -1,0 +1,109 @@
+body {
+  background-color: #fbfaf5;
+}
+
+p {
+  font-family: "Kanit", sans-serif;
+  font-size: 16px;
+  color: #121212;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  font-style: normal;
+  color: #121212;
+}
+
+.byline {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #121212;
+}
+
+.first-paragraph {
+  font-weight: bold;
+}
+
+a {
+  color: #0a7d7d;
+  text-decoration: underline;
+} 
+
+a:hover {
+  color: #073a91;
+  text-decoration: underline;
+}
+
+.person {
+  font-weight: bold;
+  color: #406eae;
+}
+
+.quote {
+  font-style: italic;
+}
+
+.logo{
+  width: 220px;
+}
+
+.small-logo{
+  width: 110px;
+}
+
+footer {
+  border-top: 2px solid #0a7d7d;
+  padding-top: 1rem;
+  margin-top: 2rem;
+}
+
+.social {
+  text-align: right;
+  font-size: 24px;
+}
+
+.social a {
+  margin-left: 0.75rem;
+}
+
+.nav-logo {
+  width: 170px;
+  height: auto;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: #fbfaf5;
+  text-decoration: none;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  text-decoration: underline;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  color: #121212;
+}
+
+h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+}
+
+.hero {
+  background-image: linear-gradient(rgba(18, 18, 18, 0.729), rgba(18, 18, 18, 0.65)), url("../images/creator-studio.png");
+  background-size: cover;
+  background-position: center;
+  padding: 4rem 2rem;
+}
+
+.hero h1,
+.hero p {
+  color: #ffffff;
+}
+
+.hero .btn {
+  text-decoration: none;
+}
